@@ -85,7 +85,7 @@ export function CollegeCard({ college }: CollegeCardProps) {
             <span className="ml-1 text-muted-foreground">{college.researchCount.toLocaleString()}</span>
           </div>
 
-          <Button onClick={handleDetailsClick} className="w-full">
+          <Button onClick={handleDetailsClick} className="w-full bg-blue-950 text-white">
             {user ? "View Details" : "Login to View Details"}
           </Button>
         </CardContent>

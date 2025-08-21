@@ -40,7 +40,7 @@ export function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
               <GraduationCap className="h-8 w-8 text-primary" />
-              <span className="font-serif text-xl font-bold text-primary">EduConnect</span>
+              <span className="font-serif text-xl font-bold text-primary">CampusWay</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -144,7 +144,7 @@ export function Navbar() {
                     <Button variant="outline" onClick={() => handleAuthClick("login")} className="mx-2">
                       Login
                     </Button>
-                    <Button onClick={() => handleAuthClick("register")} className="mx-2">
+                    <Button onClick={() => handleAuthClick("register")} className="mx-2 ">
                       Sign Up
                     </Button>
                   </div>
