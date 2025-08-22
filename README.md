@@ -1,6 +1,7 @@
 College Booking App
 
-<a href="https://college-booking-app-ebon.vercel.app/">Live Demo</a>
+<a target="_blank" href="https://college-booking-app-ebon.vercel.app/">Live Demo</a>
+
 
 A MERN stack web app that allows users to explore colleges, book services, view events, and check academic and sports facilities. Built with React.js, Node.js, Express, MongoDB, and styled using Tailwind CSS.
 
