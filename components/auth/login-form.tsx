@@ -20,6 +20,7 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false) 
 
   const { loginWithGoogle, loginWithGithub, loginEmail, loading, error, user } = useAuthStore()
+  console.log(user);
 
   const router = useRouter()
 

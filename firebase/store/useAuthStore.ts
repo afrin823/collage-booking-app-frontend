@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       const result = await signInWithGithub();
+      console.log(result);
       set({ user: result.user, loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
