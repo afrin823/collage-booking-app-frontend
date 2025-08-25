@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "./auth-context"
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
+import { useAuthStore } from "@/firebase/store/useAuthStore"
+import { useRouter } from "next/navigation"
 
 interface RegisterFormProps {
   onToggleMode: () => void
@@ -22,7 +24,8 @@ export function RegisterForm({ onToggleMode, onClose }: RegisterFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
-  const { register, isLoading } = useAuth()
+ const {registerEmail, loading} = useAuthStore()
+ const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,12 +41,8 @@ export function RegisterForm({ onToggleMode, onClose }: RegisterFormProps) {
       return
     }
 
-    const success = await register(name, email, password)
-    if (success) {
-      onClose?.()
-    } else {
-      setError("Registration failed. Please try again.")
-    }
+    await registerEmail( email, password)
+router.push("/profile")
   }
 
   return (
@@ -127,8 +126,8 @@ export function RegisterForm({ onToggleMode, onClose }: RegisterFormProps) {
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Create Account"}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Creating account..." : "Create Account"}
           </Button>
         </form>
 

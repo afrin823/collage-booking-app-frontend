@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/layout/navbar"
@@ -10,16 +9,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/components/auth/auth-context"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" 
 import { useToast } from "@/hooks/use-toast"
 import { User, Mail, MapPin, GraduationCap, Edit, Save, X, Camera } from "lucide-react"
+import { updateProfile } from "firebase/auth"
+import { useAuthStore } from "@/firebase/store/useAuthStore"
 
 export default function ProfilePage() {
-  const { user, updateProfile } = useAuth()
+   const { user, loading } = useAuthStore()  
   const router = useRouter()
   const { toast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,36 +30,36 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    if (!user) {
-      router.push("/")
+    if (!loading && !user) {
+      router.push("/")  
       return
     }
 
-    setFormData({
-      name: user.name || "",
-      email: user.email || "",
-      university: user.university || "",
-      address: user.address || "",
-      profileImage: user.profileImage || "",
-    })
-  }, [user, router])
+    if (user) {
+      setFormData({
+        name: user.displayName || "",
+        email: user.email || "",
+        university: localStorage.getItem("university") || "",
+        address: localStorage.getItem("address") || "",
+        profileImage: user.photoURL || "",
+      })
+    }
+  }, [user, loading, router])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSave = async () => {
+    if (!user) return
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      updateProfile({
-        name: formData.name,
-        email: formData.email,
-        university: formData.university,
-        address: formData.address,
-        profileImage: formData.profileImage,
+      await updateProfile(user, {
+        displayName: formData.name,
+        photoURL: formData.profileImage,
       })
+
+      localStorage.setItem("university", formData.university)
+      localStorage.setItem("address", formData.address)
 
       setIsEditing(false)
       toast({
@@ -76,11 +77,11 @@ export default function ProfilePage() {
 
   const handleCancel = () => {
     setFormData({
-      name: user?.name || "",
+      name: user?.displayName || "",
       email: user?.email || "",
-      university: user?.university || "",
-      address: user?.address || "",
-      profileImage: user?.profileImage || "",
+      university: localStorage.getItem("university") || "",
+      address: localStorage.getItem("address") || "",
+      profileImage: user?.photoURL || "",
     })
     setIsEditing(false)
   }
@@ -92,11 +93,18 @@ export default function ProfilePage() {
       setFormData((prev) => ({ ...prev, profileImage: imageUrl }))
     }
   }
+ 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
+    )
+  }
 
   if (!user) {
     return null
   }
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -145,31 +153,6 @@ export default function ProfilePage() {
                         <span className="text-center">{formData.university}</span>
                       </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Stats */}
-              <Card className="mt-4 sm:mt-6">
-                <CardHeader>
-                  <CardTitle className="font-serif text-base sm:text-lg">Account Status</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs sm:text-sm text-muted-foreground">Member Since</span>
-                    <span className="text-xs sm:text-sm font-medium">2024</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs sm:text-sm text-muted-foreground">Applications</span>
-                    <span className="text-xs sm:text-sm font-medium">
-                      {JSON.parse(localStorage.getItem("applications") || "[]").length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs sm:text-sm text-muted-foreground">Reviews</span>
-                    <span className="text-xs sm:text-sm font-medium">
-                      {JSON.parse(localStorage.getItem("reviews") || "[]").length}
-                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -234,20 +217,9 @@ export default function ProfilePage() {
                       <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-primary" />
                       Email Address
                     </Label>
-                    {isEditing ? (
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        placeholder="Enter your email address"
-                        className="h-10 sm:h-11"
-                      />
-                    ) : (
-                      <p className="text-sm sm:text-base text-foreground bg-muted/30 p-2 sm:p-3 rounded-md break-all">
-                        {formData.email || "Not provided"}
-                      </p>
-                    )}
+                    <p className="text-sm sm:text-base text-foreground bg-muted/30 p-2 sm:p-3 rounded-md break-all">
+                      {formData.email || "Not provided"}
+                    </p>
                   </div>
 
                   {/* University */}
@@ -292,29 +264,6 @@ export default function ProfilePage() {
                         {formData.address || "Not provided"}
                       </p>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Account Actions */}
-              <Card className="mt-4 sm:mt-6">
-                <CardHeader>
-                  <CardTitle className="font-serif text-base sm:text-lg lg:text-xl">Account Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push("/my-college")}
-                      className="w-full h-10 sm:h-11"
-                    >
-                      <GraduationCap className="h-4 w-4 mr-2" />
-                      My Applications
-                    </Button>
-                    <Button variant="outline" onClick={() => router.push("/admission")} className="w-full h-10 sm:h-11">
-                      <User className="h-4 w-4 mr-2" />
-                      Apply to Colleges
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

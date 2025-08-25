@@ -13,18 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useAuthStore } from "@/firebase/store/useAuthStore"
 
 export function Navbar() {
-  const { user, logout } = useAuth()
+  // const { user, logout } = useAuth()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
+ const { user,  logout, loading, error } =
+    useAuthStore();
+ 
   const handleAuthClick = (mode: "login" | "register") => {
     setAuthMode(mode)
     setIsAuthModalOpen(true)
-  }
-
+  } 
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/colleges", label: "Colleges" },
@@ -63,7 +65,7 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center space-x-2">
                       <User className="h-4 w-4" />
-                      <span>{user.name}</span>
+                      <span>{user.displayName}</span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
