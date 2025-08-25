@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await signOut(auth);
       set({ user: null, loading: false });
-      // localStorage.removeItem("authUser"); // remove if using storage
+      localStorage.removeItem("authUser");  
     } catch (err: any) {
       set({ error: err.message });
     }

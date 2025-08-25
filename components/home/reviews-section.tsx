@@ -4,6 +4,10 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 
 interface Review {
   id: number
@@ -59,21 +63,59 @@ const defaultReviews: Review[] = [
 ]
 
 export function ReviewsSection() {
-  const [reviews, setReviews] = useState<Review[]>(defaultReviews)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [formData, setFormData] = useState({
+    name: "",
+    college: "",
+    rating: 5,
+    comment: "",
+    avatar: "",
+  })
 
+  // Load reviews from localStorage + default
   useEffect(() => {
-    const savedReviews = JSON.parse(localStorage.getItem("reviews") || "[]")
-
-    // Combine saved reviews with default reviews, with saved reviews first
+    const savedReviews: Review[] = JSON.parse(localStorage.getItem("reviews") || "[]")
     const allReviews = [...savedReviews, ...defaultReviews]
-
-    // Sort by submission date (newest first) and take the most recent 6
     const sortedReviews = allReviews
       .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
       .slice(0, 6)
-
     setReviews(sortedReviews)
   }, [])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleRatingChange = (value: number) => {
+    setFormData((prev) => ({ ...prev, rating: value }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const newReview: Review = {
+      id: Date.now(),
+      name: formData.name,
+      college: formData.college,
+      rating: formData.rating,
+      comment: formData.comment,
+      avatar: formData.avatar || "/placeholder.svg",
+      submittedAt: new Date().toISOString(),
+    }
+
+    const updatedReviews = [newReview, ...reviews]
+    setReviews(updatedReviews)
+    localStorage.setItem("reviews", JSON.stringify(updatedReviews))
+
+    // Reset form
+    setFormData({
+      name: "",
+      college: "",
+      rating: 5,
+      comment: "",
+      avatar: "",
+    })
+  }
 
   return (
     <section className="py-16 px-4 bg-muted/30">
@@ -85,7 +127,7 @@ export function ReviewsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {reviews.map((review) => (
             <Card key={review.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
@@ -110,9 +152,7 @@ export function ReviewsSection() {
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-4 w-4 ${
-                              i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"
-                            }`}
+                            className={`h-4 w-4 ${i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
                           />
                         ))}
                       </div>
@@ -134,17 +174,72 @@ export function ReviewsSection() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 max-w-2xl mx-auto">
-            <h3 className="font-serif text-xl font-semibold mb-2">Share Your Experience</h3>
-            <p className="text-muted-foreground mb-4">
-              Have you attended one of these colleges? Share your experience to help future students make informed
-              decisions.
-            </p>
-            <p className="text-sm text-primary font-medium">
-              Apply to a college and leave a review in your "My College" dashboard after acceptance.
-            </p>
-          </div>
+        {/* Review Form */}
+        <div className="max-w-2xl mx-auto bg-primary/10 border border-primary/20 rounded-lg p-6">
+          <h3 className="font-serif text-xl font-semibold mb-4">Share Your Experience</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Your Name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="college">College</Label>
+              <Input
+                id="college"
+                name="college"
+                value={formData.college}
+                onChange={handleInputChange}
+                placeholder="College Name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Rating</Label>
+              <div className="flex space-x-1">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <Star
+                    key={num}
+                    className={`h-6 w-6 cursor-pointer ${
+                      num <= formData.rating ? "text-yellow-400 fill-current" : "text-gray-300"
+                    }`}
+                    onClick={() => handleRatingChange(num)}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="comment">Comment</Label>
+              <Textarea
+                id="comment"
+                name="comment"
+                value={formData.comment}
+                onChange={handleInputChange}
+                placeholder="Write your review..."
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="avatar">Avatar URL (optional)</Label>
+              <Input
+                id="avatar"
+                name="avatar"
+                value={formData.avatar}
+                onChange={handleInputChange}
+                placeholder="https://example.com/avatar.jpg"
+              />
+            </div>
+
+            <Button type="submit" className="w-full mt-2">
+              Submit Review
+            </Button>
+          </form>
         </div>
       </div>
     </section>

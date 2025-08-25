@@ -20,8 +20,7 @@ export function Navbar() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
- const { user,  logout, loading, error } =
-    useAuthStore();
+ const { user,  logout } =  useAuthStore();
  
   const handleAuthClick = (mode: "login" | "register") => {
     setAuthMode(mode)
