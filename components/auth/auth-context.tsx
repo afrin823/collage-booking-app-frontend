@@ -10,12 +10,15 @@ interface User {
   university?: string
   address?: string
   profileImage?: string
+  authProvider?: 'google' | 'github' | 'email'
 }
 
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<boolean>
   register: (name: string, email: string, password: string) => Promise<boolean>
+  loginWithGoogle: () => Promise<boolean>
+  loginWithGithub: () => Promise<boolean>
   logout: () => void
   updateProfile: (updates: Partial<User>) => void
   isLoading: boolean
@@ -49,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: email,
         university: "",
         address: "",
+        authProvider: 'email'
       }
 
       setUser(mockUser)
@@ -73,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         university: "",
         address: "",
+        authProvider: 'email'
       }
 
       setUser(newUser)
@@ -80,6 +85,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false)
       return true
     } catch (error) {
+      setIsLoading(false)
+      return false
+    }
+  }
+
+  const loginWithGoogle = async (): Promise<boolean> => {
+    setIsLoading(true)
+    try {
+      // In a real app, this would redirect to Google OAuth or use a popup
+      // For demo purposes, we'll simulate the process
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      
+      // Mock Google user data
+      const googleUser: User = {
+        id: "google_" + Date.now().toString(),
+        name: "Google User",
+        email: "user@gmail.com",
+        university: "",
+        address: "",
+        authProvider: 'google'
+      }
+
+      setUser(googleUser)
+      localStorage.setItem("user", JSON.stringify(googleUser))
+      setIsLoading(false)
+      return true
+    } catch (error) {
+      console.error("Google login failed:", error)
+      setIsLoading(false)
+      return false
+    }
+  }
+
+  const loginWithGithub = async (): Promise<boolean> => {
+    setIsLoading(true)
+    try {
+      // In a real app, this would redirect to GitHub OAuth or use a popup
+      // For demo purposes, we'll simulate the process
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      
+      // Mock GitHub user data
+      const githubUser: User = {
+        id: "github_" + Date.now().toString(),
+        name: "GitHub User",
+        email: "user@github.com",
+        university: "",
+        address: "",
+        authProvider: 'github'
+      }
+
+      setUser(githubUser)
+      localStorage.setItem("user", JSON.stringify(githubUser))
+      setIsLoading(false)
+      return true
+    } catch (error) {
+      console.error("GitHub login failed:", error)
       setIsLoading(false)
       return false
     }
@@ -104,6 +165,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         login,
         register,
+        loginWithGoogle,
+        loginWithGithub,
         logout,
         updateProfile,
         isLoading,
